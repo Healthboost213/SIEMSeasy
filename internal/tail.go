@@ -1,43 +1,50 @@
 package internal
 
 import (
-	"bytes"
-	"fmt"
 	"io"
 	"log"
 	"os"
-	"slices"
+	"regexp"
 )
 
-func FileTail(fileName string) {
+func FileTail(fileName string, regexString string) string {
 
+	// compile regex
+	re := regexp.MustCompile(regexString)
+
+	// open file
 	file, err := os.Open(fileName)
-
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer file.Close()
 
-	fileBuffer := make([]byte, 4096)
-	var lineBuffer []byte
+	// overall buffer for whole event
+	overallEventBuffer := make([]byte, 0)
 
-	file.Seek(-4096, io.SeekEnd)
-	file.Read(fileBuffer)
+	// reading in 4KB chunks to save memory
+	var chunkSize int64 = 4096
+	var currChunk int64 = 1
+	currChunkBuffer := make([]byte, 4096)
+	file.Seek(-(currChunk * chunkSize), io.SeekEnd)
+	bytesRead, _ := file.Read(currChunkBuffer)
 
-	trimmedBuffer := bytes.TrimRight(fileBuffer, "\x00")
+	// find final event
+	var finalMatch string = ""
+	matchArray := re.FindAllIndex(currChunkBuffer[0:bytesRead], -1)
+	overallEventBuffer = append(currChunkBuffer[:bytesRead], overallEventBuffer...)
 
-	var arrayIndex int = len(trimmedBuffer) - 1
-	var found bool = false
-
-	for !(found) && arrayIndex > 0 {
-		if trimmedBuffer[arrayIndex] == 0x0A {
-			break
-		} else {
-			lineBuffer = append(lineBuffer, trimmedBuffer[arrayIndex])
-			arrayIndex -= 1
-		}
+	// repeat until a match is found
+	for len(matchArray) == 0 {
+		currChunk += 1
+		file.Seek(-(currChunk * chunkSize), io.SeekEnd)
+		bytesRead, _ = file.Read(currChunkBuffer)
+		matchArray = re.FindAllIndex(currChunkBuffer[0:bytesRead], -1)
+		overallEventBuffer = append(currChunkBuffer[:bytesRead], overallEventBuffer...)
 	}
 
-	slices.Reverse(lineBuffer)
-	fmt.Printf("%s", lineBuffer)
+	finalMatch = string(overallEventBuffer[matchArray[len(matchArray)-1][0]:len(overallEventBuffer)])
+
+	return finalMatch
 
 }
