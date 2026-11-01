@@ -10,7 +10,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func DatabaseConnect(ctx context.Context) (driver.Conn, error) {
+func DbConnect(ctx context.Context) (driver.Conn, error) {
 
 	err := godotenv.Load()
 
@@ -21,7 +21,7 @@ func DatabaseConnect(ctx context.Context) (driver.Conn, error) {
 	conn, err := clickhouse.Open(&clickhouse.Options{
 		Addr: []string{os.Getenv("CLICKHOUSE_HOSTNAME")},
 		Auth: clickhouse.Auth{
-			Database: "default",
+			Database: "SIEMSeasy",
 			Username: os.Getenv("CLICKHOUSE_USERNAME"),
 			Password: os.Getenv("CLICKHOUSE_PASSWORD"),
 		},
@@ -38,6 +38,11 @@ func DatabaseConnect(ctx context.Context) (driver.Conn, error) {
 
 }
 
-func DatabaseInit(ctx context.Context) {
+func DbInit(ctx context.Context, conn driver.Conn) {
+
+	err := conn.Exec(ctx, "CREATE TABLE IF NOT EXISTS LOGS (LogID UUID PRIMARY KEY, DeviceID UUID, SourceAddress IPv4, ProductName String, ServiceName String, Message String, MessageHash String, ScrapeTimestamp DateTime, RecvTimeStamp DateTime);")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 }

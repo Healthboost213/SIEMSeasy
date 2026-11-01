@@ -4,7 +4,6 @@ import (
 	"SIEMSEasy/internal/database"
 	"SIEMSEasy/internal/realtime"
 	"context"
-	"fmt"
 	"log"
 )
 
@@ -16,24 +15,12 @@ func main() {
 
 	ctx := context.Background()
 
-	conn, err := database.DatabaseConnect(ctx)
+	conn, err := database.DbConnect(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer conn.Close()
 
-	rows, err := conn.Query(ctx, "SELECT @@version")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var version string
-		err := rows.Scan(&version)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println(version)
-	}
+	database.DbInit(ctx, conn)
 
 }

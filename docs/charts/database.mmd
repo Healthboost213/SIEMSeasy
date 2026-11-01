@@ -11,8 +11,9 @@ erDiagram
 
     LOGS {
         UUID LogID PK
-        UUID DeviceID FK
+        UUID DeviceID
         IPv4 SourceAddress
+        String ProductName
         String ServiceName
         String Message
         String MessageHash
@@ -20,11 +21,3 @@ erDiagram
         DateTime RecvTimestamp
 
     }
-
-    DEVICES {
-        UUID DeviceID PK
-        String ProductName
-        String HostName
-    }
-
-    DEVICES ||--o{ LOGS : Contains
