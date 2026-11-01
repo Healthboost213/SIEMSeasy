@@ -1,0 +1,49 @@
+---
+title: SIEMSEasy
+config:
+  theme: neo-dark
+---
+
+flowchart LR
+    
+    Master[Master Node]
+
+    subgraph Ingestion
+        agent_1[Agent 1]
+        agent_2[Agent 2]
+        agent_n[Agent n]
+    end
+
+    agent_1[Agent 1] -- "HTTP + JSON + mTLS" ---> Master
+    agent_2[Agent 2] -- "HTTP + JSON + mTLS" ---> Master
+    agent_n[Agent n] -- "HTTP + JSON + mTLS" ---> Master
+
+
+    Master ---> Storage[Storage]
+    Master ---> RealTime[Real Time]
+    Master ---> Interface[Interface]
+    
+    subgraph InterfaceMechanism[User Interfacing]
+        Interface ---> TUI ---> BubbleTea[Bubble Tea]
+        Interface ---> API ---> Fiber
+    end
+
+    subgraph Storage Layer
+        Storage ---> Hot[Database]
+        Storage ---> Cold[Cold Storage]
+
+        Hot ---> ClickHouse
+        Hot ---> DuckDB
+        ClickHouse & DuckDB ---> RegEx[Queries: RegEx]
+
+        Cold ---> Parquet
+        Parquet ---> S3[Amazon S3 Bucket]
+        Parquet ---> GCS[Google Cloud Storage]
+        Parquet ---> AzureBlob[Azure Blob Storage]
+
+    end
+
+    subgraph Realtime[Realtime Alerting]
+        RealTime ---> RingBuffer[Ring Buffer]
+        RingBuffer ---> CEL[Rules: Common Expression Language]
+    end

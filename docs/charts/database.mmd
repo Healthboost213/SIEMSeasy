@@ -1,0 +1,23 @@
+---
+title: Database Schema
+config:
+  theme: neo-dark
+---
+
+
+erDiagram
+
+    direction LR
+
+    LOGS {
+        UUID LogID PK
+        UUID DeviceID
+        IPv4 SourceAddress
+        String ProductName
+        String ServiceName
+        String Message
+        String MessageHash
+        DateTime ScrapeTimestamp
+        DateTime RecvTimestamp
+
+    }
