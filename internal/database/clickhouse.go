@@ -4,11 +4,24 @@ import (
 	"context"
 	"log"
 	"os"
+	"time"
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
 	"github.com/joho/godotenv"
 )
+
+type LogSchema struct {
+	LogID           [16]byte  `json:"logID"`
+	DeviceID        [16]byte  `json:"deviceID"`
+	SourceAddress   [4]byte   `json:"sourceAddress"`
+	ProductName     string    `json:"productName"`
+	ServiceName     string    `json:"serviceName"`
+	Message         string    `json:"message"`
+	MessageHash     [32]byte  `json:"messageHash"`
+	ScrapeTimestamp time.Time `json:"scrapeTimestamp"`
+	RecvTimestamp   time.Time `json:"recvTimestamp"`
+}
 
 func DbConnect(ctx context.Context) (driver.Conn, error) {
 
@@ -31,11 +44,10 @@ func DbConnect(ctx context.Context) (driver.Conn, error) {
 	}
 
 	if err := conn.Ping(ctx); err != nil {
-		log.Fatal("Clickhouse Error: ", err)
+		log.Fatal("ClickHouse Error: ", err)
 	}
 
 	return conn, err
-
 }
 
 func DbInit(ctx context.Context, conn driver.Conn) {

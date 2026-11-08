@@ -2,6 +2,7 @@ package main
 
 import (
 	"SIEMSEasy/internal/database"
+	"SIEMSEasy/internal/httpserver"
 	"SIEMSEasy/internal/realtime"
 	"context"
 	"log"
@@ -22,5 +23,7 @@ func main() {
 	defer conn.Close()
 
 	database.DbInit(ctx, conn)
+
+	httpserver.StartManagerHTTP()
 
 }
