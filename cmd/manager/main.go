@@ -2,6 +2,7 @@ package main
 
 import (
 	"SIEMSEasy/internal/database"
+	"SIEMSEasy/internal/httpserver"
 	"SIEMSEasy/internal/realtime"
 	"context"
 	"log"
@@ -9,11 +10,9 @@ import (
 
 func main() {
 
-	var queue realtime.RingBuffer
-	queue.Head = 0
-	queue.Tail = 0
-
 	ctx := context.Background()
+
+	mainBuffer := realtime.CreateRingBuffer()
 
 	conn, err := database.DbConnect(ctx)
 	if err != nil {
@@ -22,5 +21,7 @@ func main() {
 	defer conn.Close()
 
 	database.DbInit(ctx, conn)
+
+	httpserver.StartManagerHTTP()
 
 }
