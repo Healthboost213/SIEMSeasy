@@ -11,6 +11,7 @@ func StartManagerHTTP() {
 
 	// Manager Specific Routes
 	mux.HandleFunc("GET /api/health", healthCheck)
+	mux.HandleFunc("POST /api/ingest", ingestLogs)
 
 	// Manager takes port 6250
 	if err := http.ListenAndServe(":6250", mux); err != nil {

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"SIEMSEasy/internal/httpserver"
 	"context"
 	"log"
 	"os"
@@ -12,15 +13,38 @@ import (
 )
 
 type LogSchema struct {
-	LogID           [16]byte  `json:"logID"`
-	DeviceID        [16]byte  `json:"deviceID"`
-	SourceAddress   [4]byte   `json:"sourceAddress"`
-	ProductName     string    `json:"productName"`
-	ServiceName     string    `json:"serviceName"`
-	Message         string    `json:"message"`
-	MessageHash     [32]byte  `json:"messageHash"`
-	ScrapeTimestamp time.Time `json:"scrapeTimestamp"`
-	RecvTimestamp   time.Time `json:"recvTimestamp"`
+	LogID           [16]byte
+	DeviceID        [16]byte
+	SourceAddress   [4]byte
+	ProductName     string
+	ServiceName     string
+	Message         string
+	MessageHash     [32]byte
+	ScrapeTimestamp time.Time
+	RecvTimestamp   time.Time
+}
+
+func ConvertJsonToDb(jsonFormat httpserver.LogJSON) LogSchema {
+
+	var dbData LogSchema
+
+	// Byte Conversions
+	copy(dbData.LogID[:], jsonFormat.LogID)
+	copy(dbData.DeviceID[:], jsonFormat.DeviceID)
+	copy(dbData.SourceAddress[:], jsonFormat.SourceAddress)
+	copy(dbData.MessageHash[:], jsonFormat.MessageHash)
+
+	// String Conversions
+	dbData.ProductName = jsonFormat.ProductName
+	dbData.ServiceName = jsonFormat.ServiceName
+	dbData.Message = jsonFormat.Message
+
+	// Time Conversion
+	dbData.ScrapeTimestamp, _ = time.Parse(time.RFC3339Nano, jsonFormat.ScrapeTimestamp)
+	dbData.RecvTimestamp = time.Now()
+
+	return dbData
+
 }
 
 func DbConnect(ctx context.Context) (driver.Conn, error) {
@@ -52,7 +76,7 @@ func DbConnect(ctx context.Context) (driver.Conn, error) {
 
 func DbInit(ctx context.Context, conn driver.Conn) {
 
-	err := conn.Exec(ctx, "CREATE TABLE IF NOT EXISTS LOGS (LogID UUID PRIMARY KEY, DeviceID UUID, SourceAddress IPv4, ProductName String, ServiceName String, Message String, MessageHash String, ScrapeTimestamp DateTime, RecvTimeStamp DateTime);")
+	err := conn.Exec(ctx, "CREATE TABLE IF NOT EXISTS LOGS (LogID UUID, DeviceID UUID, SourceAddress IPv4, ProductName String, ServiceName String, Message String, MessageHash String, ScrapeTimestamp DateTime, RecvTimeStamp DateTime) ENGINE = ReplacingMergeTree ORDER BY (MessageHash);")
 	if err != nil {
 		log.Fatal(err)
 	}

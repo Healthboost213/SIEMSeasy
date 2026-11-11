@@ -9,5 +9,7 @@ A simple and high performance SIEM Utility for SysAdmins. Written in Go.
 - Leader elections and node managements
 
 ### Short-Term Project Goals:
-- Reimplement File Tailing Properly
 - Work on authentication and authorization
+- Configure proper HTTP setup
+- Configure mTLS
+- ClickHouse DB functions
