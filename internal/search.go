@@ -7,7 +7,7 @@ import (
 	"regexp"
 )
 
-func FileTail(fileName string, regexString string) string {
+func FileTail(fileName string, regexString string) []byte {
 
 	// compile regex
 	re := regexp.MustCompile(regexString)
@@ -30,7 +30,7 @@ func FileTail(fileName string, regexString string) string {
 	bytesRead, _ := file.Read(currChunkBuffer)
 
 	// find final event
-	var finalMatch string = ""
+	var finalMatch []byte
 	matchArray := re.FindAllIndex(currChunkBuffer[0:bytesRead], -1)
 	overallEventBuffer = append(currChunkBuffer[:bytesRead], overallEventBuffer...)
 
@@ -43,7 +43,7 @@ func FileTail(fileName string, regexString string) string {
 		overallEventBuffer = append(currChunkBuffer[:bytesRead], overallEventBuffer...)
 	}
 
-	finalMatch = string(overallEventBuffer[matchArray[len(matchArray)-1][0]:len(overallEventBuffer)])
+	finalMatch = overallEventBuffer[matchArray[len(matchArray)-1][0]:len(overallEventBuffer)]
 
 	return finalMatch
 
