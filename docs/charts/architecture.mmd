@@ -14,36 +14,38 @@ flowchart LR
         agent_n[Agent n]
     end
 
-    agent_1[Agent 1] -- "HTTP + JSON + mTLS" ---> Master
-    agent_2[Agent 2] -- "HTTP + JSON + mTLS" ---> Master
-    agent_n[Agent n] -- "HTTP + JSON + mTLS" ---> Master
+    agent_1[Agent 1] -- "TCP + Protobuf + mTLS" --> Master
+    agent_2[Agent 2] -- "TCP + Protobuf + mTLS" --> Master
+    agent_n[Agent n] -- "TCP + Protobuf + mTLS" --> Master
 
-
-    Master ---> Storage[Storage]
-    Master ---> RealTime[Real Time]
-    Master ---> Interface[Interface]
+    Master --> RealTime[Real Time]
+    Master --> Interface[Interface]
     
-    subgraph InterfaceMechanism[User Interfacing]
-        Interface ---> TUI ---> BubbleTea[Bubble Tea]
-        Interface ---> API ---> Fiber
+    subgraph InterfaceMechanism[User Interface]
+        Interface --> TUI --> BubbleTea[Bubble Tea]
+        Interface --> API --> http[net/http + encoding/json] --> WebClient[Web Client]
     end
 
     subgraph Storage Layer
-        Storage ---> Hot[Database]
-        Storage ---> Cold[Cold Storage]
 
-        Hot ---> ClickHouse
-        Hot ---> DuckDB
-        ClickHouse & DuckDB ---> RegEx[Queries: RegEx]
+        Hot["Database"] -- Primary Database --> ClickHouse
+        Hot -- Temporary Spool --> DuckDB
+        ClickHouse --> RegEx[Queries: RegEx w/ Bloom Filters]
 
-        Cold ---> Parquet
-        Parquet ---> S3[Amazon S3 Bucket]
-        Parquet ---> GCS[Google Cloud Storage]
-        Parquet ---> AzureBlob[Azure Blob Storage]
+        ClickHouse ---> Cold[Cold Storage]
+        Cold --> Parquet
+        Parquet --> S3[Amazon S3 Bucket]
+        Parquet --> GCS[Google Cloud Storage]
+        Parquet --> AzureBlob[Azure Blob Storage]
 
     end
 
     subgraph Realtime[Realtime Alerting]
-        RealTime ---> RingBuffer[Ring Buffer]
-        RingBuffer ---> CEL[Rules: Common Expression Language]
+        RealTime --> RingBuffer[Ring Buffer]
+        RingBuffer --> Scan["Aho-Corasick + RegEx Scanning"]
+        RingBuffer --> Config["Custom YAML Configs"]
     end
+
+    RingBuffer -- Log Ingest --> Hot
+    TUI -.-> RegEx
+    API -.-> RegEx
