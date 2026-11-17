@@ -2,7 +2,7 @@ package main
 
 import (
 	"SIEMSEasy/internal/database"
-	tcp_server "SIEMSEasy/internal/network/tcp-server"
+	"SIEMSEasy/internal/network/tcpserver"
 	"SIEMSEasy/internal/realtime"
 	"context"
 	"crypto/sha256"
@@ -43,6 +43,6 @@ func main() {
 
 	database.DbInit(ctx, conn)
 
-	tcp_server.ListenIncoming()
+	tcpserver.ListenIncoming()
 
 }
