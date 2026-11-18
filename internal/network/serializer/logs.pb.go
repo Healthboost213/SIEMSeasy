@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.12
 // 	protoc        v7.36.2
-// source: internal/network/serializer/logs.proto
+// source: logs.proto
 
-package github_com
+package serializer
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -38,7 +38,7 @@ type LogSchema struct {
 
 func (x *LogSchema) Reset() {
 	*x = LogSchema{}
-	mi := &file_internal_network_serializer_logs_proto_msgTypes[0]
+	mi := &file_logs_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -50,7 +50,7 @@ func (x *LogSchema) String() string {
 func (*LogSchema) ProtoMessage() {}
 
 func (x *LogSchema) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_network_serializer_logs_proto_msgTypes[0]
+	mi := &file_logs_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -63,7 +63,7 @@ func (x *LogSchema) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LogSchema.ProtoReflect.Descriptor instead.
 func (*LogSchema) Descriptor() ([]byte, []int) {
-	return file_internal_network_serializer_logs_proto_rawDescGZIP(), []int{0}
+	return file_logs_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *LogSchema) GetLogID() []byte {
@@ -129,11 +129,12 @@ func (x *LogSchema) GetRecvTimestamp() int64 {
 	return 0
 }
 
-var File_internal_network_serializer_logs_proto protoreflect.FileDescriptor
+var File_logs_proto protoreflect.FileDescriptor
 
-const file_internal_network_serializer_logs_proto_rawDesc = "" +
+const file_logs_proto_rawDesc = "" +
 	"\n" +
-	"&internal/network/serializer/logs.proto\"\xb3\x02\n" +
+	"\n" +
+	"logs.proto\"\xb3\x02\n" +
 	"\tLogSchema\x12\x14\n" +
 	"\x05LogID\x18\x01 \x01(\fR\x05LogID\x12\x1a\n" +
 	"\bDeviceID\x18\x02 \x01(\fR\bDeviceID\x12$\n" +
@@ -143,25 +144,25 @@ const file_internal_network_serializer_logs_proto_rawDesc = "" +
 	"\aMessage\x18\x06 \x01(\fR\aMessage\x12 \n" +
 	"\vMessageHash\x18\a \x01(\fR\vMessageHash\x12(\n" +
 	"\x0fScrapeTimestamp\x18\b \x01(\x03R\x0fScrapeTimestamp\x12$\n" +
-	"\rRecvTimestamp\x18\t \x01(\x03R\rRecvTimestampB\x0fZ\r://github.comb\x06proto3"
+	"\rRecvTimestamp\x18\t \x01(\x03R\rRecvTimestampB'Z%SIEMSEasy/internal/network/serializerb\x06proto3"
 
 var (
-	file_internal_network_serializer_logs_proto_rawDescOnce sync.Once
-	file_internal_network_serializer_logs_proto_rawDescData []byte
+	file_logs_proto_rawDescOnce sync.Once
+	file_logs_proto_rawDescData []byte
 )
 
-func file_internal_network_serializer_logs_proto_rawDescGZIP() []byte {
-	file_internal_network_serializer_logs_proto_rawDescOnce.Do(func() {
-		file_internal_network_serializer_logs_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_internal_network_serializer_logs_proto_rawDesc), len(file_internal_network_serializer_logs_proto_rawDesc)))
+func file_logs_proto_rawDescGZIP() []byte {
+	file_logs_proto_rawDescOnce.Do(func() {
+		file_logs_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_logs_proto_rawDesc), len(file_logs_proto_rawDesc)))
 	})
-	return file_internal_network_serializer_logs_proto_rawDescData
+	return file_logs_proto_rawDescData
 }
 
-var file_internal_network_serializer_logs_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
-var file_internal_network_serializer_logs_proto_goTypes = []any{
+var file_logs_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_logs_proto_goTypes = []any{
 	(*LogSchema)(nil), // 0: LogSchema
 }
-var file_internal_network_serializer_logs_proto_depIdxs = []int32{
+var file_logs_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
 	0, // [0:0] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -169,26 +170,26 @@ var file_internal_network_serializer_logs_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_internal_network_serializer_logs_proto_init() }
-func file_internal_network_serializer_logs_proto_init() {
-	if File_internal_network_serializer_logs_proto != nil {
+func init() { file_logs_proto_init() }
+func file_logs_proto_init() {
+	if File_logs_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_internal_network_serializer_logs_proto_rawDesc), len(file_internal_network_serializer_logs_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_logs_proto_rawDesc), len(file_logs_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   1,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_internal_network_serializer_logs_proto_goTypes,
-		DependencyIndexes: file_internal_network_serializer_logs_proto_depIdxs,
-		MessageInfos:      file_internal_network_serializer_logs_proto_msgTypes,
+		GoTypes:           file_logs_proto_goTypes,
+		DependencyIndexes: file_logs_proto_depIdxs,
+		MessageInfos:      file_logs_proto_msgTypes,
 	}.Build()
-	File_internal_network_serializer_logs_proto = out.File
-	file_internal_network_serializer_logs_proto_goTypes = nil
-	file_internal_network_serializer_logs_proto_depIdxs = nil
+	File_logs_proto = out.File
+	file_logs_proto_goTypes = nil
+	file_logs_proto_depIdxs = nil
 }

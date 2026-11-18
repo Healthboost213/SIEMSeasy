@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "://github.com";
+option go_package = "SIEMSEasy/internal/network/serializer";
 
 message LogSchema {
 
