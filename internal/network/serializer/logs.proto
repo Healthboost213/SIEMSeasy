@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "SIEMSEasy/internal/network/serializer";
+
+message LogSchema {
+
+  bytes LogID = 1; // uuid.UUID -> [16]byte (Convert to slice)
+  bytes DeviceID = 2; // uuid.UUID -> [16]byte (Convert to slice)
+  bytes SourceAddress = 3; // net.IP -> [4]byte (Convert to slice)
+  bytes ProductName = 4;
+  bytes ServiceName = 5;
+  bytes Message = 6;
+  bytes MessageHash = 7;
+  int64 ScrapeTimestamp = 8; // time.Time -> int64 (Unix Nano)
+  int64 RecvTimestamp = 9; // time.Time -> int64 (Unix Nano)
+
+}
