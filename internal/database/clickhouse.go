@@ -30,7 +30,7 @@ func DbConnect(ctx context.Context) (driver.Conn, error) {
 	err := godotenv.Load()
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	conn, err := clickhouse.Open(&clickhouse.Options{
@@ -46,7 +46,7 @@ func DbConnect(ctx context.Context) (driver.Conn, error) {
 	}
 
 	if err := conn.Ping(ctx); err != nil {
-		log.Fatal("ClickHouse Error: ", err)
+		log.Println("ClickHouse Error: ", err)
 	}
 
 	return conn, err
@@ -56,7 +56,7 @@ func DbInit(ctx context.Context, conn driver.Conn) {
 
 	err := conn.Exec(ctx, "CREATE TABLE IF NOT EXISTS LOGS (LogID UUID, DeviceID UUID, SourceAddress IPv4, ProductName String, ServiceName String, Message String, MessageHash FixedString(32), ScrapeTimestamp DateTime, RecvTimestamp DateTime) ENGINE = ReplacingMergeTree ORDER BY (ScrapeTimestamp, ServiceName, MessageHash);")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 }
@@ -65,20 +65,20 @@ func DbInsertLog(ctx context.Context, conn driver.Conn, logToInsert []LogSchema)
 
 	batch, err := conn.PrepareBatch(ctx, "INSERT INTO LOGS")
 	if err != nil {
-		log.Fatal("ClickHouse Error:", err)
+		log.Println("ClickHouse Error:", err)
 	}
 	defer batch.Close()
 
 	for _, singleLog := range logToInsert {
 		err := batch.AppendStruct(&singleLog)
 		if err != nil {
-			log.Fatal("ClickHouse Error:", err)
+			log.Println("ClickHouse Error:", err)
 		}
 	}
 
 	err = batch.Send()
 	if err != nil {
-		log.Fatal("ClickHouse Error:", err)
+		log.Println("ClickHouse Error:", err)
 	}
 
 }

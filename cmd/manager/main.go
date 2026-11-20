@@ -6,6 +6,7 @@ import (
 	"SIEMSEasy/internal/realtime"
 	"context"
 	"crypto/sha256"
+	"fmt"
 	"log"
 	"net"
 	"time"
@@ -32,14 +33,18 @@ func main() {
 		RecvTimestamp:   time.Now(),
 	}
 
+	fmt.Println("Initialising Ring Buffer")
 	mainBuffer := realtime.CreateRingBuffer()
 	mainBuffer.Enqueue(testLog)
+	fmt.Println("Ring Buffer Ready")
 
+	fmt.Println("Initialising Database Connection...")
 	conn, err := database.DbConnect(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer conn.Close()
+	fmt.Println("Successful ClickHouse Connection")
 
 	database.DbInit(ctx, conn)
 

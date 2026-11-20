@@ -24,5 +24,12 @@ adjusting the offsets and reading backwards until a match is found.
 
 RegEx may not be the fastest method to extract event data but it is not terribly
 slow either. Even if we are tailing 50-100 log files on just one endpoint, it
-wouldn't really be the main bottleneck for performance. It might also seem
-counterintuitive against 
+wouldn't really be the main bottleneck for performance. There are much bigger
+worries to be had such as serialization and optimizing memory and most of the
+burden of RegEx falls on the workers anyways. 
+
+It might also seem counterintuitive against SIEMSeasy's ethos because RegEx can 
+be difficult to configure. However, since we are only parsing line/event boundaries, 
+we would only have to configure the RegEx necessary to match with the opening few
+characters.
+

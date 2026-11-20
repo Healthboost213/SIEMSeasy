@@ -21,7 +21,7 @@ func healthCheck(w http.ResponseWriter, r *http.Request) {
 
 	bodyData, err := json.Marshal(currHealth)
 	if err != nil {
-		log.Fatal("JSON Error:", err)
+		log.Println("JSON Error:", err)
 	}
 
 	w.WriteHeader(200)

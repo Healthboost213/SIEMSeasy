@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"time"
 )
 
 // Server Listener
@@ -16,9 +15,9 @@ func ListenIncoming() {
 		log.Fatal("Network Error:", err)
 	}
 
-	netListener, err := net.ListenTCP("tcp", tcpAddress)
+	netListener, err := net.ListenTCP("tcp4", tcpAddress)
 	if err != nil {
-		log.Fatal("Network Error:", err)
+		log.Println("Network Error:", err)
 	}
 	defer netListener.Close()
 
@@ -26,11 +25,10 @@ func ListenIncoming() {
 
 		currentConnection, err := netListener.Accept()
 		if err != nil {
-			log.Fatal("Network Error:", err)
+			log.Println("Network Error:", err)
 		}
-		defer currentConnection.Close()
-
 		go requestHandler(currentConnection)
+
 	}
 
 }
@@ -38,26 +36,45 @@ func ListenIncoming() {
 func requestHandler(conn net.Conn) {
 
 	readBuffer := make([]byte, 4096)
-	writeBuffer := []byte("PONG\n")
 
-	bytesRead, err := conn.Read(readBuffer)
-	if err != nil {
-		log.Fatal("Network Error:", err)
-	}
-
-	fmt.Println("Bytes Read:", bytesRead)
-	fmt.Printf("Message: %s", readBuffer[:bytesRead])
-
-	// simple pong response ever 5 sec | add functionality later
 	for {
-		_, err = conn.Write(writeBuffer)
+		bytesRead, err := conn.Read(readBuffer)
 		if err != nil {
-			log.Printf("Network Error: %s", err)
+			log.Println("Network Error:", err)
+		}
+		if bytesRead == 0 {
 			break
 		}
-		fmt.Println("sent PONG")
-		dur := time.Duration(5) * time.Second
-		time.Sleep(dur)
+		fmt.Println("Bytes Read:", bytesRead)
+		fmt.Println("Message:", readBuffer[:bytesRead])
 	}
+
+}
+
+// Worker Connection
+
+func InitiateConnection() *net.TCPConn {
+
+	tcpAddress, err := net.ResolveTCPAddr("tcp4", "127.0.0.1:6205")
+	if err != nil {
+		log.Println("Network Error:", err)
+	}
+
+	netConnector, err := net.DialTCP("tcp4", nil, tcpAddress)
+	if err != nil {
+		log.Println("Network Error:", err)
+	}
+
+	return netConnector
+
+}
+
+func TransmitLog(conn *net.TCPConn, sendData *[]byte) {
+
+	n, err := conn.Write(*sendData)
+	if err != nil {
+		log.Println("Network Error:", err)
+	}
+	fmt.Println("Bytes Written:", n)
 
 }

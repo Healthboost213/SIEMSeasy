@@ -15,7 +15,7 @@ func FileTail(fileName string, regexString string) []byte {
 	// open file
 	file, err := os.Open(fileName)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	defer file.Close()
 
