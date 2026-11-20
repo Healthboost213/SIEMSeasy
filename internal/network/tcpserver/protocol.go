@@ -4,7 +4,6 @@ import (
 	"SIEMSEasy/internal/database"
 	"SIEMSEasy/internal/network/serializer"
 	"encoding/binary"
-	"fmt"
 	"log"
 	"net"
 	"time"
@@ -12,57 +11,6 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/proto"
 )
-
-var magicBytes = []byte{0x53, 0x4c, 0x54, 0x50}
-
-// Protobuf Specific Functions
-
-func ConvertToProtobuf(logStruct database.LogSchema) []byte {
-
-	protoData := serializer.LogSchema{
-		LogID:           logStruct.LogID[:],
-		DeviceID:        logStruct.DeviceID[:],
-		SourceAddress:   logStruct.SourceAddress,
-		ProductName:     logStruct.ProductName,
-		ServiceName:     logStruct.ServiceName,
-		Message:         logStruct.Message,
-		MessageHash:     logStruct.MessageHash[:],
-		ScrapeTimestamp: logStruct.ScrapeTimestamp.UnixNano(),
-		RecvTimestamp:   logStruct.RecvTimestamp.UnixNano(),
-	}
-
-	marshalledData, err := proto.Marshal(&protoData)
-	if err != nil {
-		log.Println("Protobuf Error:", err)
-	}
-
-	return marshalledData
-
-}
-
-func ConvertFromProtobuf(protoValue []byte) database.LogSchema {
-
-	var decodedLog serializer.LogSchema // protobuf struct
-
-	err := proto.Unmarshal(protoValue, &decodedLog)
-	if err != nil {
-		log.Println("Protobuf Error:", err)
-	}
-
-	var convertedLog database.LogSchema
-	convertedLog.LogID, _ = uuid.FromBytes(decodedLog.LogID)
-	convertedLog.DeviceID, _ = uuid.FromBytes(decodedLog.DeviceID)
-	convertedLog.SourceAddress = net.IP(decodedLog.SourceAddress)
-	convertedLog.ProductName = decodedLog.ProductName
-	convertedLog.ServiceName = decodedLog.ServiceName
-	convertedLog.Message = decodedLog.Message
-	convertedLog.MessageHash = [32]byte(decodedLog.MessageHash)
-	convertedLog.ScrapeTimestamp = time.Unix(0, decodedLog.ScrapeTimestamp)
-	convertedLog.RecvTimestamp = time.Unix(0, decodedLog.RecvTimestamp)
-
-	return convertedLog
-
-}
 
 // SIEMSeasy Log Transport Protocol (SLTP)
 // SLTP Wire Format:
@@ -76,6 +24,10 @@ func ConvertFromProtobuf(protoValue []byte) database.LogSchema {
 // Bits 11 : Backpressure Signal
 // Bits 12 : Resume Signal
 // Bits 13 - 15 : Reserved for future use
+
+var magicBytes = []byte{0x53, 0x4c, 0x54, 0x50}
+
+// Writing Wire Data
 
 const headerSize = 10
 
@@ -98,29 +50,59 @@ const (
 	_
 )
 
-func FrameData(protoPayload []byte) {
-	baseFrame := []byte{0x53, 0x4c, 0x54, 0x50}
-	tempbuf := make([]byte, 4)
-	binary.BigEndian.PutUint32(tempbuf, uint32(len(protoPayload)))
-	fmt.Println(tempbuf)
-	baseFrame = append(baseFrame, tempbuf...)
-	baseFrame = append(baseFrame, protoPayload...)
-	fmt.Println(baseFrame)
+func EncodeLogSLTP(logStruct database.LogSchema) ([]byte, error) {
+
+	protoData := serializer.LogSchema{
+		LogID:           logStruct.LogID[:],
+		DeviceID:        logStruct.DeviceID[:],
+		SourceAddress:   logStruct.SourceAddress,
+		ProductName:     logStruct.ProductName,
+		ServiceName:     logStruct.ServiceName,
+		Message:         logStruct.Message,
+		MessageHash:     logStruct.MessageHash[:],
+		ScrapeTimestamp: logStruct.ScrapeTimestamp.UnixNano(),
+		RecvTimestamp:   logStruct.RecvTimestamp.UnixNano(),
+	}
+
+	wireLength := proto.Size(&protoData)
+	messageFrame := make([]byte, headerSize, headerSize+wireLength)
+	copy(messageFrame, magicBytes)
+
+	flags := transferringLog
+	binary.BigEndian.PutUint16(messageFrame[4:6], flags)
+	binary.BigEndian.PutUint32(messageFrame[6:10], uint32(wireLength))
+
+	marshalledData, err := proto.MarshalOptions{}.MarshalAppend(messageFrame, &protoData)
+	if err != nil {
+		log.Println("Protobuf Error:", err)
+	}
+
+	return marshalledData, err
+
 }
 
-func FrameHeader(flags uint16) []byte {
-	var baseFrame = [headerSize]byte{0x53, 0x4c, 0x54, 0x50}
-	binary.BigEndian.PutUint16(baseFrame[4:6], flags)
-	binary.BigEndian.PutUint32(baseFrame[6:10], 0) // length
-	return baseFrame[:]
-}
+// Reading Wire Data
 
-func ReadHeader() {
+func ConvertFromProtobuf(protoValue []byte) database.LogSchema {
 
-}
+	var decodedLog serializer.LogSchema // protobuf struct
 
-// Get Log Struct -> Marshal To ProtoBuf -> Get Length -> Modify Length field -> send away
+	err := proto.Unmarshal(protoValue, &decodedLog)
+	if err != nil {
+		log.Println("Protobuf Error:", err)
+	}
 
-func SLTPEncodeLog(protoData *[]byte) {
+	var convertedLog database.LogSchema
+	convertedLog.LogID, _ = uuid.FromBytes(decodedLog.LogID)
+	convertedLog.DeviceID, _ = uuid.FromBytes(decodedLog.DeviceID)
+	convertedLog.SourceAddress = net.IP(decodedLog.SourceAddress)
+	convertedLog.ProductName = decodedLog.ProductName
+	convertedLog.ServiceName = decodedLog.ServiceName
+	convertedLog.Message = decodedLog.Message
+	convertedLog.MessageHash = [32]byte(decodedLog.MessageHash)
+	convertedLog.ScrapeTimestamp = time.Unix(0, decodedLog.ScrapeTimestamp)
+	convertedLog.RecvTimestamp = time.Unix(0, decodedLog.RecvTimestamp)
+
+	return convertedLog
 
 }

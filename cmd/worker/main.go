@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"google.golang.org/protobuf/proto"
 )
 
 func main() {
@@ -32,10 +31,7 @@ func main() {
 		RecvTimestamp:   time.Now(),
 	}
 
-	value := tcpserver.ConvertToProtobuf(testLog)
-	fmt.Println(value)
-	tcpserver.FrameHeader(1031)
-
-	proto.MarshalOptions{}.MarshalAppend()
+	returnBytes, _ := tcpserver.EncodeLogSLTP(testLog)
+	fmt.Printf("%s", returnBytes)
 
 }
