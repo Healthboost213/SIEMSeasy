@@ -3,6 +3,7 @@ package tcpserver
 import (
 	"SIEMSEasy/internal/database"
 	"SIEMSEasy/internal/network/serializer"
+	"bytes"
 	"encoding/binary"
 	"log"
 	"net"
@@ -82,6 +83,31 @@ func EncodeLogSLTP(logStruct database.LogSchema) ([]byte, error) {
 }
 
 // Reading Wire Data
+
+func parseTCPStream(streamBuffer []byte, partial []byte) ([][]byte, []byte) {
+
+	var indexes [][]int
+	var messages [][]byte
+	var startDelimiter int
+
+	streamBuffer = append(partial, streamBuffer...)
+
+	for i := 0; i < len(streamBuffer)-3; i++ {
+		if bytes.Equal(streamBuffer[i:i+4], magicBytes) {
+			startDelimiter = i
+			indexes = append(indexes, []int{startDelimiter, i + 4})
+		}
+	}
+
+	for i := 0; i < len(indexes)-1; i++ {
+		messages = append(messages, streamBuffer[indexes[i][0]:indexes[i+1][0]])
+	}
+
+	remaining := append([]byte(nil), streamBuffer[indexes[len(indexes)-1][0]:]...)
+
+	return messages, remaining
+
+}
 
 func ConvertFromProtobuf(protoValue []byte) database.LogSchema {
 

@@ -2,6 +2,7 @@ package tcpserver
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net"
 )
@@ -36,17 +37,29 @@ func ListenIncoming() {
 func requestHandler(conn net.Conn) {
 
 	readBuffer := make([]byte, 4096)
+	var partial []byte
 
 	for {
+
 		bytesRead, err := conn.Read(readBuffer)
-		if err != nil {
+
+		// Error Conditions
+		if err != nil && err != io.EOF {
 			log.Println("Network Error:", err)
+			break
+		}
+		if err == io.EOF {
+			break
 		}
 		if bytesRead == 0 {
 			break
 		}
-		fmt.Println("Bytes Read:", bytesRead)
-		fmt.Println("Message:", readBuffer[:bytesRead])
+
+		// Message Parsing
+		message, partial := parseTCPStream(readBuffer[:bytesRead], partial)
+		fmt.Printf("Message: %s\n", message)
+		fmt.Printf("Partial: %s\n", partial)
+
 	}
 
 }
@@ -69,12 +82,11 @@ func InitiateConnection() *net.TCPConn {
 
 }
 
-func TransmitLog(conn *net.TCPConn, sendData *[]byte) {
+func TransmitMessage(conn *net.TCPConn, sendData *[]byte) {
 
-	n, err := conn.Write(*sendData)
+	_, err := conn.Write(*sendData)
 	if err != nil {
 		log.Println("Network Error:", err)
 	}
-	fmt.Println("Bytes Written:", n)
 
 }
